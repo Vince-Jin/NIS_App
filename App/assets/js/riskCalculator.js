@@ -234,7 +234,7 @@ async function calculateRisk() {
             y: sortedF1,
             mode: 'lines',
             line: { color: 'navy' },
-            name: 'General Population Discharge Opportunity'
+            name: 'Discharge Opportunity'
         },
         {
             x: sortedTimePoints,
