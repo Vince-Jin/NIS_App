@@ -257,7 +257,7 @@ async function calculateRisk() {
         xaxis: {
             title: 'Time After Hospitalization (days)',
             showgrid: true,
-            dtick: 1 // Set tick interval to every 10 units
+            dtick: 5 // Set tick interval to every 10 units
         },
         yaxis: {
             title: 'Discharge Opportunity (%)',
