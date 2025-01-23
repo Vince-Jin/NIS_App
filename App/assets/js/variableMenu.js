@@ -44,7 +44,7 @@ async function updateVariableInputs() {
     const variableInputsDiv = document.getElementById('variable-inputs');
     variableInputsDiv.innerHTML = ''; // Clear previous inputs
 
-    const variables = await loadVariableData('https://raw.githubusercontent.com/Vince-Jin/testbin/refs/heads/main/test4/assets/csv/variable.csv');
+    const variables = await loadVariableData('https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/variable.csv');
 
 
 
