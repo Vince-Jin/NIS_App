@@ -46,7 +46,7 @@ async function loadModelData() {
 
 // Function to load survival data from s0.csv for s0 and timePoints
 async function loadSurvivalData() {
-    const survivalFilePath = 'https://raw.githubusercontent.com/Vince-Jin/testbin/refs/heads/main/test4/assets/csv/s0.csv';
+    const survivalFilePath = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/s0.csv';
 
     try {
         console.log('Loading survival data from:', survivalFilePath);
@@ -234,33 +234,33 @@ async function calculateRisk() {
             y: sortedF1,
             mode: 'lines',
             line: { color: 'navy' },
-            name: 'General Population Mortality Risk'
+            name: 'General Population Discharge Opportunity'
         },
         {
             x: sortedTimePoints,
             y: sortedF1_lb,
             mode: 'lines',
             line: { color: 'navy', dash: 'dash' },
-            name: 'Lower Bound of Mortality Risk'
+            name: 'Lower Bound of Discharge Opportunity'
         },
         {
             x: sortedTimePoints,
             y: sortedF1_ub,
             mode: 'lines',
             line: { color: 'navy', dash: 'dash' },
-            name: 'Upper Bound of Mortality Risk'
+            name: 'Upper Bound of Discharge Opportunity'
         }
     ];
 
     const layout = {
-        title: 'Hospitalization Risk Over Time',
+        title: 'Discharge Opportunity Over Time',
         xaxis: {
-            title: 'Time (years)',
+            title: 'Time After Hospitalization (days)',
             showgrid: true,
             dtick: 1 // Set tick interval to every 10 units
         },
         yaxis: {
-            title: 'Hospitalization Risk (%)',
+            title: 'Discharge Opportunity (%)',
             range: [0, ],
             showgrid: true
         }
