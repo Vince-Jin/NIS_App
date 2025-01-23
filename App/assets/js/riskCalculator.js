@@ -12,7 +12,7 @@ window.onload = function () {
 
 // Function to load model-specific data for beta coefficients
 async function loadModelData() {
-    const modelFilePath = 'https://raw.githubusercontent.com/Vince-Jin/testbin/refs/heads/main/test4/assets/csv/model1_overall.csv';
+    const modelFilePath = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/beta.csv';
 
     try {
         console.log('Loading model data from:', modelFilePath);
