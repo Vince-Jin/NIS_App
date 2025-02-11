@@ -3,16 +3,19 @@ let s0 = []; // Base survival function (s0)
 let timePoints = []; // Time points for the survival function
 let confidenceIntervals = {}; // Object to store confidence intervals
 
-const covUrl = 'https://raw.githubusercontent.com/Vince-Jin/testbin/refs/heads/main/test4/assets/csv/cox_var.csv';
+const covUrl = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/vari_appen.csv';
+const covUrl2 = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/vari_neph.csv';
 
 window.onload = function () {
     updateVariableInputs();
+    updateVariableInputs2();
     loadModelData(); // Load model-specific data on page load
+    loadModelData2(); // Load model-specific data on page load
 };
 
 // Function to load model-specific data for beta coefficients
 async function loadModelData() {
-    const modelFilePath = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/beta.csv';
+    const modelFilePath = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/beta_appen.csv';
 
     try {
         console.log('Loading model data from:', modelFilePath);
@@ -44,9 +47,43 @@ async function loadModelData() {
     }
 }
 
+// Function to load model-specific data for beta coefficients
+async function loadModelData2() {
+    const modelFilePath = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/beta_neph.csv';
+
+    try {
+        console.log('Loading model data from:', modelFilePath);
+
+        const data = await fetchCSV(modelFilePath);
+
+        if (data.length === 0) {
+            console.error(`Error: No data found in ${modelFilePath}`);
+            return;
+        }
+
+        const [header, ...rows] = data;
+
+        // Use the 4th column for beta coefficients
+        betaCoefficients2 = rows.map(row => {
+            const cols = row.split(',');
+            return parseFloat(cols[3]); // Use the 4th column
+        });
+
+        console.log('Loaded Beta Coefficients:', betaCoefficients);
+
+        // Load survival function data (s0) and time points from s0.csv
+        await loadSurvivalData2(); // Call function to load s0.csv
+
+        // Load covariance matrix and calculate confidence intervals
+        await loadCovarianceMatrixAndCalculateCI2(covUrl2, betaCoefficients2, scenarioVector2);
+    } catch (error) {
+        console.error(`Error loading model data from ${modelFilePath}:`, error);
+    }
+}
+
 // Function to load survival data from s0.csv for s0 and timePoints
 async function loadSurvivalData() {
-    const survivalFilePath = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/s0.csv';
+    const survivalFilePath = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/s0_appen.csv';
 
     try {
         console.log('Loading survival data from:', survivalFilePath);
@@ -69,6 +106,33 @@ async function loadSurvivalData() {
         console.error(`Error loading survival data from ${survivalFilePath}:`, error);
     }
 }
+
+// Function to load survival data from s0.csv for s0 and timePoints
+async function loadSurvivalData2() {
+    const survivalFilePath = 'https://raw.githubusercontent.com/Vince-Jin/NIS_App/refs/heads/main/App/assets/csv/s0_neph.csv';
+
+    try {
+        console.log('Loading survival data from:', survivalFilePath);
+
+        const data = await fetchCSV(survivalFilePath);
+
+        if (data.length === 0) {
+            console.error(`Error: No data found in ${survivalFilePath}`);
+            return;
+        }
+
+        const [header, ...rows] = data;
+
+        // Use the 1st column for timePoints and 2nd column for s0
+        timePoints2 = rows.map(row => parseFloat(row.split(',')[0])); // Use the 1st column
+        s0_2 = rows.map(row => parseFloat(row.split(',')[1])); // Use the 2nd column
+
+        console.log('Loaded survival data:', { timePoints2, s0_2 });
+    } catch (error) {
+        console.error(`Error loading survival data from ${survivalFilePath}:`, error);
+    }
+}
+
 
 // Example fetchCSV utility to load the CSV file
 async function fetchCSV(filePath) {
@@ -181,6 +245,35 @@ async function loadCovarianceMatrixAndCalculateCI(covUrl, betaCoefficients, scen
     }
 }
 
+// Function to load covariance matrix and calculate confidence intervals
+async function loadCovarianceMatrixAndCalculateCI2(covUrl, betaCoefficients, scenarioVector) {
+    try {
+        // Parse the CSV file
+        const data = await parseCsv(covUrl);
+
+        // Reconstruct the covariance matrix
+        const covMatrix = reconstructCovMatrix(data);
+
+        // Log the beta matrix and c matrix
+        console.log('Beta Matrix:', betaCoefficients);
+        console.log('C Matrix (Scenario Vector):', scenarioVector);
+
+        // Calculate the confidence intervals
+        const confidenceIntervals2 = calculateConfidenceIntervals(betaCoefficients, scenarioVector, covMatrix);
+
+        // Log the variance (covariance) matrix
+        console.log('Variance (Covariance) Matrix:', covMatrix);
+
+        // Display the results
+        console.log(`Mean of the linear combination: ${confidenceIntervals2.mean}`);
+        console.log(`95% Confidence Interval: [${confidenceIntervals2.lower}, ${confidenceIntervals2.upper}]`);
+
+        return confidenceIntervals2;
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+    }
+}
+
 // Function to calculate risk (example implementation)
 async function calculateRisk() {
     // Example risk calculation logic
@@ -188,16 +281,25 @@ async function calculateRisk() {
     // Use betaCoefficients, s0, and timePoints to calculate risk
     // Adjust f0 by the logHR to calculate the risk
     const logHR = scenarioVector.reduce((acc, value, index) => acc + value * betaCoefficients[index], 0);
+    const logHR2 = scenarioVector2.reduce((acc, value, index) => acc + value * betaCoefficients2[index], 0);
     
     // Load covariance matrix and calculate confidence intervals
     const ci = await loadCovarianceMatrixAndCalculateCI(covUrl, betaCoefficients, scenarioVector); // Ensure the function is awaited
+    const ci2 = await loadCovarianceMatrixAndCalculateCI2(covUrl2, betaCoefficients2, scenarioVector2); // Ensure the function is awaited
     console.log('Confidence Intervals:', ci);
+    console.log('Confidence Intervals2:', ci2);
     
     const logHR_lb = ci.lower;
     const logHR_ub = ci.upper;
     console.log('logHR:', logHR);
     console.log('logHR_lb:', logHR_lb);
     console.log('logHR_ub:', logHR_ub);
+
+    const logHR2_lb = ci2.lower;
+    const logHR2_ub = ci2.upper;
+    console.log('logHR2:', logHR2);
+    console.log('logHR2_lb:', logHR2_lb);  
+    console.log('logHR2_ub:', logHR2_ub);
     
     const f0 = s0.map(s => (1 - s)); // Convert survival probability to mortality risk
     const f1help = f0.map((f, index) => Math.min(f * Math.exp(logHR), 1)); // Apply logHR to adjust risk
@@ -213,6 +315,17 @@ async function calculateRisk() {
     console.log('f1_lb:', f1_lb);
     console.log('f1_ub:', f1_ub);
 
+    const f0_2 = s0_2.map(s => (1 - s)); // Convert survival probability to mortality risk
+    const f1help2 = f0_2.map((f, index) => Math.min(f * Math.exp(logHR2), 1)); // Apply logHR to adjust risk
+    const f1help2_lb = f0_2.map((f, index) => Math.max(Math.min(f * Math.exp(logHR2_lb), 1), 0)); // Apply logHR to adjust risk
+    const f1help2_ub = f0_2.map((f, index) => Math.max(Math.min(f * Math.exp(logHR2_ub), 1), 0)); // Apply logHR to adjust risk
+    const f1_2 = f1help2.map((f, index) => f * 100); // Apply logHR to adjust risk
+    const f1_lb2 = f1help2_lb.map((f, index) => f * 100); // Apply logHR to adjust risk
+    const f1_ub2 = f1help2_ub.map((f, index) => f * 100); // Apply logHR to adjust risk
+    console.log('f1_2:', f1_2);
+    console.log('f1_lb2:', f1_lb2);
+    console.log('f1_ub2:', f1_ub2);
+
     const sortedData = timePoints.map((time, index) => ({ time, risk: f1[index] }))
         .sort((a, b) => a.time - b.time); // Sort by time
 
@@ -226,6 +339,20 @@ async function calculateRisk() {
     const sortedF1 = sortedData.map(item => item.risk);
     const sortedF1_lb = sortedData_lb.map(item => item.risk);
     const sortedF1_ub = sortedData_ub.map(item => item.risk);
+
+    const sortedData2 = timePoints2.map((time, index) => ({ time, risk: f1_2[index] }))
+        .sort((a, b) => a.time - b.time); // Sort by time
+
+    const sortedData2_lb = timePoints2.map((time, index) => ({ time, risk: f1_lb2[index] }))
+        .sort((a, b) => a.time - b.time); // Sort by time
+
+    const sortedData2_ub = timePoints2.map((time, index) => ({ time, risk: f1_ub2[index] }))
+        .sort((a, b) => a.time - b.time); // Sort by time
+
+    const sortedTimePoints2 = sortedData2.map(item => item.time);
+    const sortedF1_2 = sortedData2.map(item => item.risk);
+    const sortedF1_lb2 = sortedData2_lb.map(item => item.risk);
+    const sortedF1_ub2 = sortedData2_ub.map(item => item.risk);
 
     // Use Plotly.js to create the plot
     const data = [
@@ -248,6 +375,27 @@ async function calculateRisk() {
             y: sortedF1_ub,
             mode: 'lines',
             line: { color: 'navy', dash: 'dash' },
+            name: 'Upper Bound of Discharge Opportunity'
+        },
+        {
+            x: sortedTimePoints2,
+            y: sortedF1_2,
+            mode: 'lines',
+            line: { color: 'maroon' },
+            name: 'Discharge Opportunity'
+        },
+        {
+            x: sortedTimePoints2,
+            y: sortedF1_lb2,
+            mode: 'lines',
+            line: { color: 'maroon', dash: 'dash' },
+            name: 'Lower Bound of Discharge Opportunity'
+        },
+        {
+            x: sortedTimePoints2,
+            y: sortedF1_ub2,
+            mode: 'lines',
+            line: { color: 'maroon', dash: 'dash' },
             name: 'Upper Bound of Discharge Opportunity'
         }
     ];
